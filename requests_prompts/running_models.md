@@ -1,0 +1,7 @@
+# Executando inferências com modelos
+
+- Fale qua atualmente existem formas de rodar localmente como exemplo ollama, llama.cpp, e pytorch buscando modelos do huggingface. Também cite provedores online, e inclusive as APIs fornecidas pela anthropic, OpenAI e Gemini, por exemplo. 
+- Explique a fundo como funciona a ollama - como é programado, como se instala no computador, histórico, disponibilidade dos modelos (e o formato dos mesmos na máquina do usuário), e como funciona o servidor localmente na máquina do usuário. Também explique como o modelo é distribuído entre CPU e GPU utilizando tanto a RAM quanto a VRAM da máquina. Também cite que existem diversas quantizações do mesmo modelo no repositório online, além de números de parâmetros diferentes que foram providos pelo criador do modelo.
+- Mostre como o padrão da OpenAI para código e comunicação com diversos provedores é bastante difundido, reforçando a necessidade de inserção de chave de usuário no sistema. Dê exemplo de códigos em python se ligando ao modelo GPT da própria OpenAI, bem como para o gemini ou anthropic.
+- Mostre e explique o framework langchain em detalhes (gerar figura), e como ele pode ser usado de forma vantajosa em certos cenários. Dê um exmplo simples em python, aliado ao ollama.
+- Mostre como é o conceito do framework langgraph, seu propósito, e um bom exemplo de aplicação. Dê o exemplo em python, também com modelos ollama, para ilustrar o resultado (gerar figura).
