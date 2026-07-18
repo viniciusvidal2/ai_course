@@ -49,6 +49,22 @@ Um **token** é a unidade básica de processamento dos modelos de IA, equivalent
 *   **Janelas de Contexto de Entrada (Input Context):** Atualmente, as janelas de contexto alcançaram proporções massivas. Enquanto modelos antigos limitavam-se a 2.048 ou 4.096 tokens, hoje temos janelas padrões de **128.000 tokens** (Llama 3), **200.000 tokens** (Claude 3.5) e até **2.000.000 de tokens** no Gemini 1.5 Pro, permitindo o carregamento de livros inteiros, repositórios de código e horas de vídeo.
 *   **Limites de Tokens de Saída (Output Context):** Embora a entrada seja muito longa, a geração de saída costuma ser menor devido a limites computacionais e de estabilidade de atenção. A maioria dos modelos atuais suporta saídas entre **4.096 e 8.192 tokens**, com modelos de fronteira expandindo para até **16.384 tokens** gerados por vez.
 
+### Impacto dos Tokens de Saída e da Temperatura
+Os parâmetros de **tokens de saída** e **temperatura** influenciam diretamente custo, latência e estilo da resposta:
+
+*   **Número de tokens de saída (max output tokens):**
+    *   **Custo:** quanto maior o limite, maior o custo potencial da chamada, pois o provedor costuma cobrar por token gerado.
+    *   **Latência:** respostas longas demoram mais para serem concluídas, aumentando o tempo total de inferência.
+    *   **Controle de formato:** limites curtos reduzem verbosidade e ajudam em saídas objetivas (ex: JSON curto), enquanto limites altos favorecem explicações longas e detalhadas.
+    *   **Risco de corte:** se o limite for baixo demais, a resposta pode ser truncada no meio do raciocínio ou da estrutura.
+
+*   **Temperatura (temperature):**
+    *   **Baixa temperatura (ex: 0.0 a 0.3):** respostas mais determinísticas, estáveis e previsíveis, ideais para tarefas técnicas, extração de dados e código.
+    *   **Temperatura média (ex: 0.4 a 0.7):** equilíbrio entre precisão e variação linguística.
+    *   **Alta temperatura (ex: 0.8+):** maior criatividade e diversidade lexical, porém com mais risco de inconsistências, alucinações e perda de foco.
+
+Em aplicações reais, a prática recomendada é ajustar os dois parâmetros em conjunto: **temperatura baixa com limite de saída adequado ao formato esperado** para tarefas críticas, e **temperatura mais alta com limite maior** quando o objetivo for ideação criativa.
+
 Abaixo, a Figura 1 ilustra a diferença estrutural no fluxo de processamento de tokens entre modelos densos e esparsos baseados em MoE.
 
 ![Figura 1: Comparação entre Arquiteturas Densas e Esparsas do Tipo Mixture of Experts (MoE)](../images/moe_vs_dense_architecture.jpg)
