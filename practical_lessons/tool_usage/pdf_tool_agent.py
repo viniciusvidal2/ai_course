@@ -2,10 +2,25 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, Optional
 
 import fitz
 from ollama import Client
+from pydantic import BaseModel, Field
+
+
+class AgentResponse(BaseModel):
+    action: Literal["extract_content", "extract_images", "answer", "done"] = Field(
+        description="The action to take: 'extract_content' to get text, 'extract_images' to get images, 'answer' to update progress, or 'done' if the goal is fully achieved."
+    )
+    formatted_query: Optional[str] = Field(
+        default=None,
+        description="Search query to extract relevant content. Required if action is 'extract_content'."
+    )
+    final_answer: Optional[str] = Field(
+        default=None,
+        description="The final answer or progress description. Required if action is 'answer' or 'done'."
+    )
 
 
 def parse_args() -> argparse.Namespace:
@@ -154,7 +169,11 @@ def main() -> int:
         print(f"Last model response: {last_response_text}\n")
 
         try:
-            response = client.chat(model=args.model, messages=messages)
+            response = client.chat(
+                model=args.model,
+                messages=messages,
+                format=AgentResponse.model_json_schema(),
+            )
             model_text = (response.get("message", {}).get("content") or "").strip()
             if not model_text:
                 raise ValueError("Main model returned empty response.")
@@ -163,10 +182,11 @@ def main() -> int:
             print(f"Model output: {model_text}\n")
 
             action_payload = parse_model_json(model_text)
-            action = action_payload.get("action", "").strip().lower()
+            validated_payload = AgentResponse.model_validate(action_payload)
+            action = validated_payload.action.strip().lower()
 
             if action == "extract_content":
-                formatted_query = action_payload.get("formatted_query", args.query)
+                formatted_query = validated_payload.formatted_query or args.query
                 output_path = extract_content_to_markdown(
                     pdf_path=pdf_path,
                     formatted_user_query=formatted_query,
@@ -186,11 +206,9 @@ def main() -> int:
                         "extract_images executed. No images were found in this PDF."
                     )
             elif action == "answer":
-                tool_result = action_payload.get(
-                    "final_answer", "Progress update provided without final answer."
-                )
+                tool_result = validated_payload.final_answer or "Progress update provided without final answer."
             elif action == "done":
-                final_answer = action_payload.get("final_answer", "Goal reached.")
+                final_answer = validated_payload.final_answer or "Goal reached."
                 print(f"Final answer: {final_answer}")
                 print("\nFunction execution log:")
                 for item in execution_log:

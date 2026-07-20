@@ -83,7 +83,54 @@ python pdf_tool_agent.py \
   --max-steps 8
 ```
 
-## 4) Docker usage
+## 4) Script: `markdown_to_pdf_mcp.py` (MCP Server)
+
+### Intent
+Exposes a Model Context Protocol (MCP) server that contains a tool to generate PDFs from Markdown content. It can also be run locally as a standalone script to demonstrate model-driven tool usage.
+
+### Functionalities
+- **MCP Server Mode**: Initiates a stdio-based MCP server (`--run-mcp`) exposing the tool `convert_markdown_to_pdf`. This server can be registered in MCP clients like Claude Desktop or Cursor, or consumed by custom MCP clients.
+- **Standalone Demo Mode**: Sends a request to Ollama with the tool definition attached, simulating how an LLM automatically decides to call the MCP tool to generate the PDF.
+
+### Registered Tools
+- `convert_markdown_to_pdf(markdown_content, output_path)`:
+  - Takes raw Markdown text input.
+  - Generates a PDF file formatting heading styles (`#`, `##`, `###`) and wrapping standard paragraph text.
+  - Saves the PDF output to the specified `output_path`.
+
+### Run examples
+
+#### Run as a stdio MCP Server (for MCP Clients)
+```bash
+python markdown_to_pdf_mcp.py --run-mcp
+```
+
+#### Run Standalone Tool-Calling Demo (via Ollama)
+```bash
+python markdown_to_pdf_mcp.py \
+  --model llama3.2:1b \
+  --host http://localhost:11434
+```
+
+## 5) Script: `markdown_to_pdf_client.py` (MCP Client)
+
+### Intent
+Serves as an MCP client that automatically locates and runs the MCP server programmatically over standard input/output (stdio), queries its tools, passes markdown content to the PDF converter tool, and awaits the response.
+
+### How it works
+1. Locates the server script (`markdown_to_pdf_mcp.py`) relative to its own path.
+2. Launches the server in a subprocess using Python with the `--run-mcp` argument.
+3. Performs the MCP handshake to initialize the session.
+4. List the available tools from the server to verify connectivity.
+5. Invokes `convert_markdown_to_pdf` with custom Markdown content.
+6. Saves the generated PDF as `client_output.pdf` in the same directory.
+
+### Run example
+```bash
+python markdown_to_pdf_client.py
+```
+
+## 6) Docker usage
 
 ### Build image
 
